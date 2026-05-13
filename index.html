@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#2d5a1b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Jardin Bio">
+<link rel="manifest" href="manifest.json">
+<title>🌿 Mon Jardin Bio · Pau</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#1a1208;color:#f0e8d0}
+
+/* NAV BAS */
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:#1e2a0e;border-top:1px solid #3a5c28;display:flex;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:#6a8a4a;font-size:10px;font-weight:600;cursor:pointer;transition:color .15s}
+.nav-btn.active{color:#a8cc80}
+.nav-btn .nav-icon{font-size:22px;line-height:1}
+
+/* PAGES */
+#app{position:fixed;top:0;left:0;right:0;bottom:60px;overflow:hidden}
+.page{position:absolute;inset:0;overflow-y:auto;display:none;-webkit-overflow-scrolling:touch}
+.page.active{display:block}
+
+/* HEADER */
+.page-header{background:linear-gradient(135deg,#2d5a1b,#1a3a0e);padding:16px 16px 12px;position:sticky;top:0;z-index:10}
+.page-header h1{font-size:18px;font-weight:700;color:#e8f5d0}
+.page-header p{font-size:12px;color:#8ab870;margin-top:2px}
+
+/* AUJOURD'HUI */
+.today-hero{background:linear-gradient(135deg,#3a5c28,#2a4a18);margin:12px;border-radius:14px;padding:14px;border:1px solid #5a8c3a}
+.today-date{font-size:13px;color:#a8cc80;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.today-title{font-size:20px;font-weight:700;color:#e8f5d0;margin-top:4px}
+.today-sub{font-size:12px;color:#7a9a5a;margin-top:3px}
+.progress-bar{background:#1a3a0e;border-radius:20px;height:8px;margin-top:10px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#5a8c3a,#a8cc80);border-radius:20px;transition:width .4s}
+.progress-label{font-size:11px;color:#8ab870;margin-top:4px}
+
+/* SECTIONS MATIN/SOIR */
+.time-section{margin:0 12px 8px}
+.time-header{display:flex;align-items:center;gap:8px;padding:10px 14px 6px}
+.time-header-morn{background:#2a2010;border-radius:10px 10px 0 0;border:1px solid #4a3a20;border-bottom:none}
+.time-header-eve{background:#0e1a2a;border-radius:10px 10px 0 0;border:1px solid #1a2a3a;border-bottom:none}
+.time-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.time-label-morn{color:#c8a040}
+.time-label-eve{color:#6090c0}
+
+/* TÂCHES */
+.task-list{border-radius:0 0 10px 10px;overflow:hidden;border:1px solid;border-top:none}
+.task-list-morn{border-color:#4a3a20;background:#1e1808}
+.task-list-eve{border-color:#1a2a3a;background:#0a1020}
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;transition:background .12s;user-select:none}
+.task-item:last-child{border-bottom:none}
+.task-item:active{background:rgba(255,255,255,.06)}
+.task-item.done .task-text{text-decoration:line-through;opacity:.35}
+.task-item.done .task-tag{opacity:.3}
+.task-check{width:22px;height:22px;border-radius:6px;border:2px solid #5a8c3a;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s;background:transparent}
+.task-item.done .task-check{background:#3a7a2a;border-color:#3a7a2a}
+.task-check svg{display:none;width:13px;height:13px}
+.task-item.done .task-check svg{display:block}
+.task-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.tag-arrosage{background:#0a2a4a;color:#60a8d8}
+.tag-traitement{background:#0a2a0a;color:#60c050}
+.tag-taille{background:#2a1a08;color:#c07030}
+.tag-recolte{background:#2a0a08;color:#e06840}
+.tag-sol{background:#1e1408;color:#b08040}
+.tag-observation{background:#1a0a2a;color:#a060e0}
+.tag-balcon{background:#081a2a;color:#50b0e0}
+.tag-urgent{background:#2a0808;color:#e04040}
+.task-text{font-size:13px;line-height:1.45;color:#c8d8b0;flex:1}
+.task-item.done .task-text{color:#6a7a5a}
+
+/* TIP */
+.tip-box{margin:0 12px 12px;background:#0e1e08;border-left:3px solid #5a8c3a;border-radius:0 8px 8px 0;padding:9px 12px;font-size:12px;color:#7aaa58;line-height:1.5}
+.tip-box strong{color:#a8cc80}
+
+/* CALENDRIER - liste des jours */
+.month-title{padding:14px 14px 8px;font-size:16px;font-weight:700;color:#a8cc80;display:flex;align-items:center;gap:8px}
+.month-nav{background:#2a4a18;border:none;color:#a8cc80;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.day-row{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid #1e2a0e;cursor:pointer;transition:background .12s;gap:10px}
+.day-row:active{background:#1e2a0e}
+.day-row.today-row{background:#1a2a0a;border-left:3px solid #a8cc80}
+.day-row.past-row{opacity:.5}
+.day-num{font-size:22px;font-weight:700;color:#5a8c3a;min-width:32px;text-align:center}
+.today-row .day-num{color:#c8e090}
+.day-info{flex:1}
+.day-name{font-size:13px;font-weight:600;color:#c8d8b0}
+.day-tags{font-size:11px;color:#5a7a3a;margin-top:2px}
+.day-prog{font-size:11px;color:#5a8c3a;font-weight:600}
+.day-prog.done-all{color:#a8cc80}
+.day-chevron{color:#3a5a2a;font-size:14px}
+.today-badge{background:#3a7a2a;color:#a8cc80;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.07em;margin-left:4px}
+
+/* VUE JOUR (detail) */
+.back-btn{display:flex;align-items:center;gap:6px;padding:12px 14px;color:#7aaa58;font-size:13px;font-weight:600;cursor:pointer;background:#0e1a08;border-bottom:1px solid #1e2a0e}
+.back-btn:active{background:#1a2a10}
+
+/* PARCELLES */
+.parcel-card{margin:10px 12px;background:#0e1a08;border-radius:12px;border:1px solid #2a4a18;overflow:hidden}
+.parcel-header{padding:12px 14px;background:#1a2a0e;display:flex;align-items:center;gap:10px}
+.parcel-title{font-size:15px;font-weight:700;color:#c8e090}
+.parcel-sub{font-size:11px;color:#6a8a4a;margin-top:2px}
+.parcel-badge{font-size:10px;background:#3a5c28;color:#a8cc80;padding:2px 8px;border-radius:10px;font-weight:600}
+.plant-grid{padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px}
+.plant-chip2{display:flex;align-items:center;gap:5px;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .12s}
+.plant-chip2:active{transform:scale(.96)}
+.chip-sol{background:#2a1a00;border:1px solid #6a4a10;color:#c09050}
+.chip-solanee{background:#2a0a00;border:1px solid #8a3a10;color:#e08060}
+.chip-cucurbit{background:#001a2a;border:1px solid #1a5a8a;color:#60a8d8}
+.chip-feuille{background:#002a00;border:1px solid #1a6a1a;color:#70c050}
+.chip-aromatique{background:#0a2a0a;border:1px solid #2a6a2a;color:#90d060}
+.chip-compagne{background:#1a1a00;border:1px solid #6a6a10;color:#c0c040}
+.chip-balcon{background:#001a2a;border:1px solid #0a4a6a;color:#50a0c8}
+
+/* FICHE PLANT */
+.plant-sheet{position:fixed;bottom:0;left:0;right:0;background:#0e1a08;border-radius:18px 18px 0 0;border-top:2px solid #3a5c28;z-index:200;transform:translateY(100%);transition:transform .3s;max-height:70vh;overflow-y:auto}
+.plant-sheet.open{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;background:#3a5c28;border-radius:2px;margin:10px auto 0}
+.sheet-header{padding:12px 16px 8px;display:flex;align-items:center;gap:10px}
+.sheet-emoji{font-size:28px}
+.sheet-name{font-size:18px;font-weight:700;color:#e8f5d0}
+.sheet-family{font-size:11px;color:#6a8a4a;text-transform:uppercase;letter-spacing:.08em}
+.sheet-close{margin-left:auto;background:#1a2a0e;border:none;color:#7aaa58;width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer}
+.info-row{display:flex;gap:8px;padding:0 16px 10px;flex-wrap:wrap}
+.info-pill{background:#1a2a0e;border-radius:8px;padding:7px 10px;font-size:11px;flex:1;min-width:120px}
+.info-pill strong{display:block;color:#6aaa4a;font-size:9px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.info-pill span{color:#b0c890}
+.assoc-section{padding:0 16px 16px}
+.assoc-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#5a8c3a;margin-bottom:6px}
+.assoc-good{font-size:12px;color:#7ac050;line-height:1.7}
+.assoc-bad{font-size:12px;color:#c05030;line-height:1.7;margin-top:6px}
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;display:none}
+.sheet-overlay.open{display:block}
+
+/* SETTINGS / INFO */
+.info-card{margin:10px 12px;background:#0e1a08;border-radius:12px;border:1px solid #2a4a18;padding:14px}
+.info-card h3{font-size:14px;font-weight:700;color:#a8cc80;margin-bottom:6px}
+.info-card p{font-size:12px;color:#7a9a5a;line-height:1.6}
+.reset-btn{margin:10px 12px;padding:12px;background:#2a0a08;border:1px solid #6a1a10;border-radius:10px;color:#e06040;font-size:13px;font-weight:600;width:calc(100% - 24px);cursor:pointer;text-align:center}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#3a5c28;border-radius:3px}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- PAGE AUJOURD'HUI -->
+  <div class="page active" id="page-today">
+    <div class="page-header">
+      <h1>🌿 Mon Jardin Bio</h1>
+      <p id="header-date">Pau · Chargement...</p>
+    </div>
+    <div id="today-content"></div>
+  </div>
+
+  <!-- PAGE CALENDRIER -->
+  <div class="page" id="page-cal">
+    <div class="page-header">
+      <h1>📅 Calendrier</h1>
+      <p>Mai → Novembre 2026</p>
+    </div>
+    <div id="cal-content"></div>
+  </div>
+
+  <!-- PAGE JOUR DÉTAIL -->
+  <div class="page" id="page-day">
+    <div class="back-btn" onclick="backToCal()">← Calendrier</div>
+    <div id="day-detail-content"></div>
+  </div>
+
+  <!-- PAGE PARCELLES -->
+  <div class="page" id="page-parcelles">
+    <div class="page-header">
+      <h1>🗺️ Mes Parcelles</h1>
+      <p>3 espaces · Associations bio</p>
+    </div>
+    <div id="parcelles-content"></div>
+  </div>
+
+  <!-- PAGE INFO -->
+  <div class="page" id="page-info">
+    <div class="page-header">
+      <h1>⚙️ Infos</h1>
+      <p>Réglages &amp; recettes bio</p>
+    </div>
+    <div id="info-content"></div>
+  </div>
+
+</div>
+
+<!-- NAV BAS -->
+<div id="bottom-nav">
+  <button class="nav-btn active" id="nav-today" onclick="showPage('today')">
+    <span class="nav-icon">🌱</span>Aujourd'hui
+  </button>
+  <button class="nav-btn" id="nav-cal" onclick="showPage('cal')">
+    <span class="nav-icon">📅</span>Calendrier
+  </button>
+  <button class="nav-btn" id="nav-parcelles" onclick="showPage('parcelles')">
+    <span class="nav-icon">🗺️</span>Parcelles
+  </button>
+  <button class="nav-btn" id="nav-info" onclick="showPage('info')">
+    <span class="nav-icon">⚙️</span>Recettes
+  </button>
+</div>
+
+<!-- FICHE PLANTE -->
+<div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet()"></div>
+<div class="plant-sheet" id="plant-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-emoji" id="s-emoji"></span>
+    <div><div class="sheet-name" id="s-name"></div><div class="sheet-family" id="s-family"></div></div>
+    <button class="sheet-close" onclick="closeSheet()">✕</button>
+  </div>
+  <div class="info-row" id="s-info"></div>
+  <div class="assoc-section" id="s-assoc"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// DONNÉES
+// ════════════════════════════════════════
+
+const TODAY_DATE = new Date(2026,4,10); // 10 mai 2026 - mettre à jour selon la date réelle
+const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const DAYS_FR = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+// STORAGE
+const SK = 'jardin-pau-v4';
+function load(){ try{ return JSON.parse(localStorage.getItem(SK)||'{}'); }catch(e){ return {}; } }
+function save(d){ try{ localStorage.setItem(SK,JSON.stringify(d)); }catch(e){} }
+function isDone(id){ return !!load()[id]; }
+function toggle(id){
+  var d=load();
+  if(d[id]) delete d[id]; else d[id]=1;
+  save(d);
+}
+
+// ════ TÂCHES PAR JOUR ════
+// Situation réelle au 10 mai 2026 :
+// ✅ Salades plantées jardinière balcon
+// ✅ Fraises (3 Gariguette + 3 Charlotte) jardinière balcon  
+// ✅ Betteraves pleine terre (planche A)
+// ✅ Haricots grimpants serre, tuteurs installés
+// ✅ Parcelle C préparée, prête à planter
+// 🔜 Tomates cerises balcon : aujourd'hui/demain
+// 🔜 Tomates pleine terre : aujourd'hui
+// 🔜 Haricots : à planter
+// 🔜 Cucurbitacées parcelle C : à planter
+
+const TASKS = {
+  // FORMAT: 'YYYY-MM-DD': { morn:[], eve:[], tip:'' }
+
+  '2026-05-10': {
+    morn:[
+      {tag:'urgent', t:'🍒 Préparer jardinière tomates cerises : terreau riche + compost + tuteur 80 cm'},
+      {tag:'urgent', t:'🍒 Planter les tomates cerises noires en jardinière balcon — enterrer profond jusqu\'aux 1ères feuilles'},
+      {tag:'urgent', t:'🌱 Haricots grimpants : planter les pieds en pleine terre à côté des betteraves, 1 pied par tuteur'},
+      {tag:'sol', t:'🎃 Parcelle C prête ! Planter les courgettes côté nord (espacement 1,5 m)'},
+      {tag:'observation', t:'🌿 Serre J4 : sortir poivrons, aubergines, melons au soleil du matin — ombre l\'après-midi'},
+    ],
+    eve:[
+      {tag:'sol', t:'🍅 Installer tuteurs tomates pleine terre (1,5 m) dans parcelle B côté ouest'},
+      {tag:'sol', t:'🍅 Planter les tomates en pleine terre le soir — espacement 80 cm, enterrer profond'},
+      {tag:'sol', t:'🎃 Planter les courges côté sud parcelle C (espacement 1,5 m–2 m) — pailler immédiatement'},
+      {tag:'arrosage', t:'Arrosage d\'installation : tomates + courgettes + courges'},
+      {tag:'observation', t:'🌿 Serre J4 soir : rentrer poivrons, aubergines, melons'},
+      {tag:'arrosage', t:'🍓 Arroser fraises balcon — premier soir post-plantation'},
+    ],
+    tip:'🍅 Planter les tomates profondément (enterrer la tige jusqu\'aux 1ères feuilles) — elles développent des racines sur toute la tige enterrée. Plus de racines = plus de résistance à la sécheresse.'
+  },
+
+  '2026-05-11': {
+    morn:[
+      {tag:'arrosage', t:'Arroser toutes les jardinières balcon (tomates cerises + fraises + salades)'},
+      {tag:'arrosage', t:'Arroser les tomates et courges fraîchement plantées en pleine terre'},
+      {tag:'sol', t:'🥒 Planter les concombres en parcelle B sur treillis — espacement 50 cm'},
+      {tag:'sol', t:'Pailler le pied des tomates (8–10 cm, 5 cm d\'espace autour du collet)'},
+      {tag:'observation', t:'🌿 Serre J5 : sortir poivrons, aubergines, melons en plein soleil toute la journée'},
+    ],
+    eve:[
+      {tag:'arrosage', t:'Arrosage d\'installation concombres'},
+      {tag:'sol', t:'Pailler autour des courgettes et courges parcelle C'},
+      {tag:'observation', t:'Inspecter les haricots grimpants : reprise en cours ?'},
+      {tag:'traitement', t:'Surveiller limaces sur jeunes plants — poser pièges à bière si nécessaire'},
+      {tag:'observation', t:'🌿 Serre J5 soir : rentrer poivrons, aubergines, melons pour la nuit'},
+    ],
+    tip:'🥒 Les concombres sur treillis vertical gagnent de la place et améliorent la circulation d\'air. Orienter le treillis nord-sud pour ne pas faire d\'ombre aux autres plants.'
+  },
+
+  '2026-05-12': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage complet toutes les cultures — jardinières + pleine terre'},
+      {tag:'sol', t:'🍈 Planter les melons au centre parcelle C (espacement 1 m) — pailler'},
+      {tag:'observation', t:'Vérifier la reprise des tomates pleine terre : feuilles dressées = OK'},
+      {tag:'observation', t:'🌿 Serre J6 : sortir poivrons/aubergines/melons. Première nuit dehors si T° > 12°C'},
+    ],
+    eve:[
+      {tag:'arrosage', t:'Arrosage d\'installation melons'},
+      {tag:'sol', t:'Glisser une petite pierre ou tuile sous les futures courges/melons (anti-pourriture)'},
+      {tag:'traitement', t:'Vider les pièges à bière, renouveler la bière'},
+      {tag:'observation', t:'🌿 Serre J6 soir : laisser dehors si nuit > 12°C — vérifier météo'},
+      {tag:'balcon', t:'🍒 Tomates cerises J2-3 : vérifier que la tige est bien attachée au tuteur'},
+    ],
+    tip:'🍈 Les melons adorent la chaleur du plein sud de ta parcelle C. Avec le sol préparé sous bâche, ils ont exactement les conditions idéales.'
+  },
+
+  '2026-05-13': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage matinal — toutes les cultures'},
+      {tag:'observation', t:'Saints de Glace J1 (13 mai) — pas de gel prévu à Pau, rester vigilant'},
+      {tag:'taille', t:'Pincer les premiers gourmands des tomates pleine terre'},
+      {tag:'observation', t:'Vérifier la reprise de tous les plants fraîchement plantés'},
+    ],
+    eve:[
+      {tag:'observation', t:'Saints de Glace J1 soir : rentrer poivrons/aubergines si encore en serre'},
+      {tag:'traitement', t:'Surveiller pucerons sur tomates, poivrons, aubergines'},
+      {tag:'sol', t:'Compléter le paillis là où il manque'},
+      {tag:'balcon', t:'🍓 Fraises : inspecter feuilles, chercher limaces'},
+    ],
+    tip:'🌡️ Saints de Glace à Pau : généralement bénins grâce au climat atlantique. Un voile de forçage sous la main suffit en cas de surprise.'
+  },
+
+  '2026-05-14': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage jardinières + pleine terre'},
+      {tag:'observation', t:'Saints de Glace J2 — dernière nuit à risque'},
+      {tag:'sol', t:'Préparer la planche pour poivrons et aubergines (plantation demain !)'},
+      {tag:'sol', t:'Enrichir la future planche poivrons/aubergines en compost mûr'},
+    ],
+    eve:[
+      {tag:'arrosage', t:'Arroser les godets de poivrons/aubergines avant plantation demain'},
+      {tag:'observation', t:'Dernière nuit en serre pour les plants frileux — demain plantation définitive !'},
+      {tag:'traitement', t:'Inspecter sous les feuilles de tomates : premiers pucerons ?'},
+      {tag:'sol', t:'Désherber et pailler la planche poivrons/aubergines'},
+    ],
+    tip:'🫑 Dernière nuit en serre ! Demain 15 mai, Saints de Glace passés — plantation définitive pour poivrons, aubergines et si pas encore fait, les melons.'
+  },
+
+  '2026-05-15': {
+    morn:[
+      {tag:'urgent', t:'✅ Saints de Glace passés ! Planter poivrons en parcelle B — espacement 40–50 cm'},
+      {tag:'urgent', t:'Planter aubergines en parcelle B — espacement 50–60 cm'},
+      {tag:'arrosage', t:'Arroser les godets poivrons/aubergines 1h avant de planter'},
+      {tag:'arrosage', t:'Arrosage habituel des jardinières balcon'},
+    ],
+    eve:[
+      {tag:'arrosage', t:'Arrosage d\'installation copieux poivrons + aubergines'},
+      {tag:'sol', t:'Pailler immédiatement le pied des poivrons et aubergines'},
+      {tag:'sol', t:'Installer tuteurs légers pour poivrons et aubergines'},
+      {tag:'observation', t:'Vérifier la reprise de toutes les cultures de la semaine'},
+    ],
+    tip:'✅ Le 15 mai est le cap de la saison à Pau. Après les Saints de Glace, toutes les cultures frileuses peuvent aller en pleine terre sans crainte !'
+  },
+
+  '2026-05-16': {
+    morn:[
+      {tag:'arrosage', t:'Arroser tous les plants fraîchement mis en terre + jardinières balcon'},
+      {tag:'sol', t:'Pailler le pied des poivrons et aubergines si pas encore fait'},
+      {tag:'taille', t:'Pinçage hebdomadaire gourmands tomates'},
+      {tag:'observation', t:'Vérifier la reprise de toutes les cultures de cette semaine'},
+    ],
+    eve:[
+      {tag:'observation', t:'Tour complet des 3 parcelles — bilan visuel de la semaine 2'},
+      {tag:'traitement', t:'Surveiller doryphores sur aubergines (insectes orange rayés)'},
+      {tag:'arrosage', t:'Arrosage soir si journée très ensoleillée et venteuse'},
+      {tag:'balcon', t:'Fertiliser jardinières au purin d\'ortie dilué 20% si prêt'},
+    ],
+    tip:'🌿 Si le purin d\'ortie est démarré le 8 mai, il sera prêt vers le 23 mai. Parfait pour la première fertilisation !'
+  },
+
+  '2026-05-17': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage matinal complet'},
+      {tag:'taille', t:'Pinçage gourmands tomates + attacher nouvelles tiges aux tuteurs'},
+      {tag:'sol', t:'Désherbage général — les mauvaises herbes profitent des arrosages'},
+      {tag:'observation', t:'🌱 Haricots grimpants : commencent-ils à grimper sur les tuteurs ?'},
+    ],
+    eve:[
+      {tag:'sol', t:'Biner légèrement entre les rangs pour aérer le sol'},
+      {tag:'traitement', t:'Vérifier les pièges à bière autour de toutes les jeunes plantations'},
+      {tag:'arrosage', t:'Arroser les betteraves si sol sec'},
+      {tag:'balcon', t:'Inspecter les salades : chercher pucerons ou traces de grignotage'},
+    ],
+    tip:'🌱 Les haricots grimpants poussent vite par temps chaud. Guider les premières tiges vers les tuteurs si elles cherchent leur chemin.'
+  },
+
+  '2026-05-18': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage jardinières + pleine terre'},
+      {tag:'taille', t:'Pinçage tomates cerises balcon + tomates pleine terre'},
+      {tag:'sol', t:'Attacher les tiges des tomates cerises à leurs tuteurs (balcon)'},
+      {tag:'observation', t:'Vérifier la croissance des courgettes et concombres — ils poussent vite !'},
+    ],
+    eve:[
+      {tag:'traitement', t:'Premier traitement purin d\'ortie 10% foliaire si prêt — sur tomates'},
+      {tag:'observation', t:'Surveiller l\'apparition de fleurs sur les courgettes'},
+      {tag:'balcon', t:'Vérifier humidité des jardinières — sol doit rester légèrement humide'},
+      {tag:'sol', t:'Compléter le paillis où il commence à se décomposer'},
+    ],
+    tip:'💡 Astuce : tester l\'humidité des jardinières au doigt — enfoncer 2 cm dans le terreau. Si c\'est sec, arroser. Si humide, attendre.'
+  },
+
+  '2026-05-19': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage jardinières balcon'},
+      {tag:'arrosage', t:'Arrosage pleine terre : tomates, courgettes, courges, melons'},
+      {tag:'taille', t:'Vérifier et attacher nouvelles tiges des tomates pleine terre'},
+      {tag:'observation', t:'Melons : vérifier la reprise — ils peuvent accuser le choc de plantation'},
+    ],
+    eve:[
+      {tag:'sol', t:'Désherbage rapide autour des melons et courges'},
+      {tag:'traitement', t:'Surveiller oïdium sur courgettes : poudre blanche sur feuilles'},
+      {tag:'balcon', t:'Arroser salades balcon si le soleil du matin les a asséchées'},
+      {tag:'observation', t:'Observer feuillage des poivrons : légère flaccidité le soir = normal'},
+    ],
+    tip:'🍈 Si tes melons ont l\'air mous les premiers jours, c\'est normal — choc de transplantation. Arroser régulièrement et ils reprennent en quelques jours.'
+  },
+
+  '2026-05-20': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage complet matin'},
+      {tag:'taille', t:'Pinçage hebdomadaire tomates (toutes les semaines sans exception)'},
+      {tag:'sol', t:'Installer un treillis ou filet pour les concombres s\'ils commencent à grimper'},
+      {tag:'traitement', t:'Purin d\'ortie 10% sur toutes les solanacées si prêt'},
+    ],
+    eve:[
+      {tag:'recolte', t:'Premières feuilles de salades balcon récoltables ? Tester une feuille extérieure'},
+      {tag:'observation', t:'Premières fleurs jaunes sur les courgettes ?'},
+      {tag:'arrosage', t:'Arrosage soir si journée chaude'},
+      {tag:'balcon', t:'Fertiliser les jardinières au purin d\'ortie 20% au pied'},
+    ],
+    tip:'🥗 Salades balcon : récolter les feuilles extérieures dès 15 cm. Laisser le cœur pousser — la plante continue de produire pendant des semaines.'
+  },
+
+  '2026-05-21': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage matinal — toutes les cultures'},
+      {tag:'taille', t:'Pinçage tomates + attacher les nouvelles tiges aux tuteurs'},
+      {tag:'sol', t:'Désherbage hebdomadaire général'},
+      {tag:'observation', t:'Bilan semaine 3 : toutes les cultures plantées ? Reprise satisfaisante ?'},
+    ],
+    eve:[
+      {tag:'traitement', t:'Macérat de prêle dilué 20% en pulvérisation préventive anti-mildiou'},
+      {tag:'sol', t:'Biner entre les rangs de betteraves et haricots'},
+      {tag:'balcon', t:'Inspecter jardinières : limaces, pucerons, dessèchement'},
+      {tag:'arrosage', t:'Arrosage soir si temps sec et venteux'},
+    ],
+    tip:'📅 Fin de semaine 3 : si tout s\'est bien passé, toutes tes cultures sont plantées et en reprise active !'
+  },
+
+  '2026-05-22': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage jardinières + pleine terre'},
+      {tag:'traitement', t:'🌿 Purin d\'ortie prêt (démarré le 8) — filtrer et mettre en bouteille'},
+      {tag:'taille', t:'Pinçage tomates cerises balcon + tomates pleine terre'},
+      {tag:'sol', t:'Vérifier le paillis : rajouter si nécessaire'},
+    ],
+    eve:[
+      {tag:'traitement', t:'Premier arrosage fertilisant au purin d\'ortie 20% au pied de toutes les cultures'},
+      {tag:'observation', t:'Surveiller premiers signes de mildiou sur tomates'},
+      {tag:'recolte', t:'🥗 Récolter premières feuilles de salades balcon si bonne taille'},
+      {tag:'balcon', t:'🍓 Fraises : premières fleurs blanches ? Gariguettes fleurissent en premier !'},
+    ],
+    tip:'🌿 Purin d\'ortie prêt ! Utilise-le en arrosage au pied (20%) et pulvérisation foliaire (10%) en alternance chaque semaine.'
+  },
+
+  '2026-05-23': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage matinal complet'},
+      {tag:'taille', t:'Supprimer les premières feuilles du bas des tomates (touchant le sol)'},
+      {tag:'sol', t:'Désherber autour des courges et courgettes qui commencent à s\'étaler'},
+      {tag:'observation', t:'Vérifier la croissance des melons : bien repris maintenant'},
+    ],
+    eve:[
+      {tag:'traitement', t:'Macérat de prêle 20% en pulvérisation foliaire préventive anti-mildiou'},
+      {tag:'recolte', t:'🥗 Récolte feuilles de salades balcon si taille suffisante'},
+      {tag:'arrosage', t:'Arroser si besoin selon météo'},
+      {tag:'observation', t:'🫑 Poivrons : premières fleurs blanches apparues ? Excellent signe !'},
+    ],
+    tip:'✂️ Supprimer les feuilles du bas des tomates jusqu\'à 30 cm du sol améliore la circulation d\'air et réduit le risque de mildiou.'
+  },
+
+  '2026-05-24': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage jardinières + pleine terre'},
+      {tag:'taille', t:'Pinçage hebdomadaire tomates — toutes les semaines'},
+      {tag:'sol', t:'Attacher tiges de tomates qui ont grandi cette semaine'},
+      {tag:'traitement', t:'Purin d\'ortie 10% foliaire tomates, poivrons, aubergines'},
+    ],
+    eve:[
+      {tag:'recolte', t:'🥗 Récolter les salades balcon mûres — couper à la base'},
+      {tag:'observation', t:'Courgettes : première courgette en formation visible ?'},
+      {tag:'sol', t:'Désherbage rapide'},
+      {tag:'balcon', t:'Ressemer une jardinière de salades pour une 2e vague de récolte en juillet'},
+    ],
+    tip:'🔄 Ressemer des salades toutes les 3 semaines pour avoir des récoltes continues tout l\'été !'
+  },
+
+  '2026-05-25': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage matinal — les températures montent fin mai à Pau'},
+      {tag:'sol', t:'Vérifier l\'humidité sous le paillis : sol doit rester frais'},
+      {tag:'observation', t:'🌱 Haricots grimpants : ils grimpent sur les tuteurs ? Guider si besoin'},
+      {tag:'traitement', t:'Surveiller pucerons sur poivrons et aubergines — savon noir si besoin'},
+    ],
+    eve:[
+      {tag:'traitement', t:'Macérat de prêle si temps humide (préventif mildiou)'},
+      {tag:'arrosage', t:'Arrosage profond pleine terre si pas de pluie depuis 3 jours'},
+      {tag:'balcon', t:'🍒 Tomates cerises balcon : secouer légèrement les grappes de fleurs pour aider la pollinisation'},
+      {tag:'sol', t:'Binage léger entre toutes les rangées'},
+    ],
+    tip:'🐝 Secouer doucement les grappes de fleurs des tomates cerises chaque matin favorise l\'auto-pollinisation et améliore la nouaison des fruits.'
+  },
+
+  '2026-05-26': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage jardinières + toutes cultures pleine terre'},
+      {tag:'taille', t:'Pinçage tomates cerises balcon + tomates pleine terre'},
+      {tag:'sol', t:'Ajouter tuteur ou rallonger les attaches si les tomates ont grandi'},
+      {tag:'observation', t:'🍈 Melons : ont-ils des fleurs ? Pollinisation en cours ?'},
+    ],
+    eve:[
+      {tag:'traitement', t:'Purin d\'ortie 20% au pied de toutes les cultures en pot — fertilisation'},
+      {tag:'recolte', t:'🌿 Récolter premières feuilles d\'oseille balcon si elles ont 15 cm'},
+      {tag:'observation', t:'Tour du jardin : bilan de la 4e semaine de mai'},
+      {tag:'balcon', t:'Nettoyer sous les jardinières, vérifier soucoupes'},
+    ],
+    tip:'🌿 L\'oseille se récolte feuille par feuille depuis l\'extérieur. Couper les tiges florales dès qu\'elles apparaissent pour prolonger la production.'
+  },
+
+  '2026-05-27': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage matinal — chaleur qui s\'installe fin mai'},
+      {tag:'taille', t:'Pincer les premières tiges de courges pour favoriser la ramification'},
+      {tag:'sol', t:'Désherbage général hebdomadaire'},
+      {tag:'observation', t:'🥒 Concombres : premières fleurs apparues ?'},
+    ],
+    eve:[
+      {tag:'traitement', t:'Traitement préventif mildiou + purin d\'ortie (alterner chaque semaine)'},
+      {tag:'arrosage', t:'Arrosage copieux courgettes et concombres — grande consommation d\'eau'},
+      {tag:'balcon', t:'Vérifier jardinières : sèchent plus vite avec la chaleur'},
+      {tag:'observation', t:'🍆 Aubergines : premières fleurs violettes ? Très bon signe !'},
+    ],
+    tip:'🍆 Les fleurs violettes d\'aubergine annoncent les premiers fruits pour fin juin !'
+  },
+
+  '2026-05-28': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage complet matin'},
+      {tag:'taille', t:'Pinçage hebdomadaire tomates — priorité absolue'},
+      {tag:'sol', t:'Attacher toutes les tiges de tomates qui ont poussé'},
+      {tag:'traitement', t:'Macérat de prêle en préventif si temps couvert ou humide'},
+    ],
+    eve:[
+      {tag:'recolte', t:'🥗 Récolter les grandes feuilles de salades avant montaison'},
+      {tag:'observation', t:'Surveiller : les salades montent-elles en graines avec la chaleur ?'},
+      {tag:'sol', t:'Binage léger entre tous les rangs'},
+      {tag:'arrosage', t:'Arrosage soir si journée chaude et venteuse'},
+    ],
+    tip:'⚠️ Si les salades commencent à monter (tige centrale qui s\'allonge), récolter immédiatement — elles deviennent amères rapidement.'
+  },
+
+  '2026-05-29': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage jardinières balcon — vérifier 2× par jour si >25°C'},
+      {tag:'arrosage', t:'Arrosage profond pleine terre'},
+      {tag:'observation', t:'🥒 Courgettes : premières courgettes minuscules au pied des fleurs femelles ?'},
+      {tag:'taille', t:'Continuer pinçage tomates + attacher nouvelles tiges'},
+    ],
+    eve:[
+      {tag:'traitement', t:'Purin d\'ortie foliaire 10% sur tomates, poivrons, aubergines'},
+      {tag:'sol', t:'Vérifier et recharger le paillis si nécessaire'},
+      {tag:'balcon', t:'Fertiliser jardinières au purin d\'ortie 20% au pied'},
+      {tag:'observation', t:'Bilan fin mai : toutes les cultures en place, en bonne santé ?'},
+    ],
+    tip:'🎉 Bravo ! Si tu en es là, toutes tes cultures sont en place. Le plus dur est fait — place à la croissance et aux récoltes de juin !'
+  },
+
+  '2026-05-30': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage matinal — derniers jours de mai'},
+      {tag:'taille', t:'Pinçage tomates + suppression feuilles du bas jaunissantes'},
+      {tag:'sol', t:'Désherbage final de mai'},
+      {tag:'observation', t:'Observer la croissance de toutes les cultures : bilan visuel complet'},
+    ],
+    eve:[
+      {tag:'traitement', t:'Traitement préventif mildiou (prêle ou bouillie bordelaise bio)'},
+      {tag:'arrosage', t:'Arrosage du soir si temps sec'},
+      {tag:'recolte', t:'🥗 Récolter dernières salades avant montaison certaine avec la chaleur de juin'},
+      {tag:'balcon', t:'Ressemer jardinière de salades pour juillet'},
+    ],
+    tip:'🌱 En juin les températures montent à Pau. Protéger les salades du soleil de midi avec un voile d\'ombrage léger.'
+  },
+
+  '2026-05-31': {
+    morn:[
+      {tag:'arrosage', t:'Arrosage matinal — fin de mois'},
+      {tag:'taille', t:'Dernier pinçage de mai sur toutes les tomates'},
+      {tag:'observation', t:'Tour complet du jardin : noter ce qui doit être amélioré en juin'},
+      {tag:'traitement', t:'Macérat de prêle ou purin d\'ortie selon alternance'},
+    ],
+    eve:[
+      {tag:'sol', t:'Binage général de toutes les planches'},
+      {tag:'arrosage', t:'Arrosage profond avant juin — les chaleurs arrivent'},
+      {tag:'balcon', t:'Vérifier l\'état des jardinières, compléter en terreau si nécessaire'},
+      {tag:'observation', t:'🥒 Premières courgettes à récolter si elles ont atteint 12–15 cm'},
+    ],
+    tip:'🌞 Bienvenue en juin ! Les premiers légumes arrivent, les arrosages vont s\'intensifier. C\'est la saison de pleine croissance !'
+  },
+};
+
+// TÂCHES GÉNÉRIQUES PAR SEMAINE pour les mois suivants
+function getGenericTasks(date) {
+  var m = date.getMonth(); // 0-indexed
+  var d = date.getDate();
+  var week = Math.floor((d-1)/8); // 0-3
+
+  var T = {
+    5: [ // Juin
+      { morn:[{tag:'arrosage',t:'Arroser les jardinières balcon tôt le matin'},{tag:'arrosage',t:'Arroser la pleine terre profondément'},{tag:'taille',t:'Pinçage hebdomadaire gourmands tomates'},{tag:'traitement',t:'Purin d\'ortie 10% foliaire sur solanacées'}], eve:[{tag:'recolte',t:'🥗 Premières salades récoltables — couper le soir'},{tag:'observation',t:'Surveiller taches brunes de mildiou sous feuilles tomates'},{tag:'sol',t:'Biner entre les rangs'},{tag:'traitement',t:'Macérat de prêle 20% préventif mildiou'}], tip:'🍒 Les tomates cerises balcon arrivent en premier — surveiller dès fin juin !' },
+      { morn:[{tag:'arrosage',t:'Arrosage matin — la chaleur s\'installe'},{tag:'traitement',t:'Macérat de prêle cette semaine (alterner)'},{tag:'taille',t:'Ébouillanter feuilles du bas des tomates'},{tag:'balcon',t:'Fertiliser jardinières purin d\'ortie 20%'}], eve:[{tag:'recolte',t:'🍒 Premières tomates cerises balcon récoltables !'},{tag:'observation',t:'Surveiller oïdium sur courgettes (poudre blanche)'},{tag:'traitement',t:'Bicarbonate 5g/L + savon noir si oïdium'},{tag:'arrosage',t:'Arrosage copieux courgettes et concombres'}], tip:'🍓 Gariguettes en pleine récolte ! Récolter le matin, elles sont plus sucrées.' },
+      { morn:[{tag:'arrosage',t:'Arroser tôt avant 9h'},{tag:'taille',t:'Pincer gourmands + étêter courgettes après 3 fruits'},{tag:'sol',t:'Vérifier et compléter le paillis'},{tag:'traitement',t:'Purin d\'ortie foliaire solanacées'}], eve:[{tag:'recolte',t:'🥒 Récolter courgettes à 15–18 cm, ne pas laisser grossir'},{tag:'recolte',t:'🥗 Récolter salades avant montaison'},{tag:'observation',t:'Vérifier les melons : fruits en formation ?'},{tag:'traitement',t:'Traitement préventif mildiou si temps humide'}], tip:'☀️ En juin à Pau les journées dépassent 30°C. Un voile d\'ombrage protège les salades de la montaison.' },
+      { morn:[{tag:'arrosage',t:'Arrosage jardinières 2× par jour si canicule'},{tag:'taille',t:'Pinçage tomates, attacher nouvelles tiges'},{tag:'traitement',t:'Décoction d\'ail 5% si signes fongiques'},{tag:'recolte',t:'🥒 Cueillir concombres dès 15–20 cm'}], eve:[{tag:'arrosage',t:'Arrosage profond pleine terre'},{tag:'observation',t:'Tour du jardin — plants en retard ?'},{tag:'sol',t:'Désherbage hebdomadaire'},{tag:'recolte',t:'🍒 Récolter tomates cerises balcon chaque soir'}], tip:'🐝 Ne pas traiter pendant la floraison des melons, courgettes — protéger les abeilles.' }
+    ],
+    6: [ // Juillet
+      { morn:[{tag:'arrosage',t:'Arroser jardinières TOUS LES MATINS — priorité absolue en juillet'},{tag:'arrosage',t:'Arroser pleine terre profondément tôt (avant 8h)'},{tag:'recolte',t:'Récolter tomates, courgettes, concombres chaque matin'},{tag:'taille',t:'Pinçage hebdomadaire tomates + supprimer feuilles malades'}], eve:[{tag:'arrosage',t:'Si T° >32°C : second arrosage jardinières le soir après 19h'},{tag:'recolte',t:'🍒 Récolter tomates cerises balcon chaque soir'},{tag:'observation',t:'Surveiller araignées rouges (toiles fines sous feuilles)'},{tag:'traitement',t:'Savon noir + huile de neem si araignées rouges'}], tip:'💧 En juillet les jardinières peuvent nécessiter 2 arrosages/jour. Tester au doigt avant d\'arroser.' },
+      { morn:[{tag:'arrosage',t:'Arrosage jardinières + pleine terre, toujours tôt'},{tag:'recolte',t:'Récolter quotidiennement : courgettes, concombres, poivrons'},{tag:'taille',t:'Supprimer feuilles du bas des tomates'},{tag:'balcon',t:'Fertiliser jardinières au purin d\'ortie 20%'}], eve:[{tag:'recolte',t:'Premières grosses tomates récoltables si bien colorées'},{tag:'traitement',t:'Traitement mildiou hebdomadaire'},{tag:'observation',t:'Vérifier les melons : odeur prononcée = maturité'},{tag:'sol',t:'Glisser une tuile sous melons et courges'}], tip:'🍈 Un melon mûr dégage un parfum puissant. Ne pas se fier uniquement à la couleur !' },
+      { morn:[{tag:'arrosage',t:'Arrosage matinal systématique'},{tag:'recolte',t:'Grande récolte tomates, cerises, courgettes, concombres'},{tag:'taille',t:'Étêter les tomates : supprimer le bourgeon terminal'},{tag:'sol',t:'Vérifier et compléter le paillis'}], eve:[{tag:'arrosage',t:'Arrosage soir jardinières si très chaud (>33°C)'},{tag:'recolte',t:'Récolter poivrons verts ou laisser rougir'},{tag:'observation',t:'🫚 Betteraves : diamètre >6cm = prêtes à récolter'},{tag:'traitement',t:'Purin d\'ortie foliaire si feuillage pâlit'}], tip:'🫑 Plus tu récoltes les poivrons, plus la plante produit. Ne pas laisser trop de fruits simultanément.' },
+      { morn:[{tag:'arrosage',t:'Arrosage tôt — double si canicule annoncée'},{tag:'recolte',t:'Récolter aubergines brillantes et fermes'},{tag:'taille',t:'Pincer extrémités des courges après 3 fruits'},{tag:'balcon',t:'Vérifier que les jardinières ne surchauffent pas'}], eve:[{tag:'recolte',t:'🍒 Récolte quotidienne tomates cerises balcon'},{tag:'traitement',t:'Décoction d\'ail si champignons sur tomates'},{tag:'observation',t:'Tour général du jardin'},{tag:'sol',t:'Désherbage rapide'}], tip:'🌿 Fin juillet : commencer semis salades d\'automne pour repiquer en août.' }
+    ],
+    7: [ // Août
+      { morn:[{tag:'arrosage',t:'Maintenir arrosage quotidien tôt'},{tag:'recolte',t:'Récolte intensive : tomates, courgettes, concombres, aubergines'},{tag:'taille',t:'Continuer pinçage tomates'},{tag:'balcon',t:'Fertiliser jardinières purin d\'ortie'}], eve:[{tag:'recolte',t:'🍒 Récolter tomates cerises chaque soir'},{tag:'traitement',t:'Surveillance mildiou avec fraîcheur nuits août'},{tag:'sol',t:'Semer jardinière salades d\'automne (variété batavia)'},{tag:'observation',t:'Vérifier maturité des courges'}], tip:'🍅 Août = apogée des tomates à Pau. Prévoir bocaux et congélateur !' },
+      { morn:[{tag:'arrosage',t:'Arrosage matinal — réduire légèrement vs juillet'},{tag:'recolte',t:'Récolter courges et melons dès maturité'},{tag:'taille',t:'Étêter définitivement les tomates qui montent'},{tag:'sol',t:'Repiquer les salades d\'automne semées la semaine précédente'}], eve:[{tag:'traitement',t:'Traitement oïdium courgettes — fréquent en fin d\'été'},{tag:'recolte',t:'🫚 Premières betteraves si diamètre suffisant'},{tag:'observation',t:'Feuilles jaunes par le bas sur tomates = normal'},{tag:'balcon',t:'Préparer 2e jardinière de salades pour septembre'}], tip:'🥒 Les concombres produisent moins en août — normal, fin de cycle.' },
+      { morn:[{tag:'arrosage',t:'Arrosage se réduit avec les nuits fraîches'},{tag:'recolte',t:'Récolter betteraves avant trop grande taille'},{tag:'taille',t:'Tailler plants de tomates épuisés'},{tag:'sol',t:'Semer salades d\'hiver en pleine terre'}], eve:[{tag:'recolte',t:'Récolter les dernières courgettes — plants fatiguent'},{tag:'traitement',t:'Traitement préventif mildiou renforcé'},{tag:'observation',t:'Repérer les plants à arracher prochainement'},{tag:'balcon',t:'🍓 Charlotte remontante reprend vigueur avec la fraîcheur'}], tip:'🍂 Laisser mûrir quelques courges jusqu\'à peau très dure — elles se conserveront tout l\'hiver.' },
+      { morn:[{tag:'arrosage',t:'Réduire progressivement les arrosages'},{tag:'recolte',t:'Récolte massive poivrons et aubergines'},{tag:'sol',t:'Commencer à incorporer résidus dans le compost'},{tag:'taille',t:'Supprimer feuilles malades, nettoyer sous les plants'}], eve:[{tag:'recolte',t:'Récolter toutes les tomates colorées'},{tag:'sol',t:'Binage général de toute la planche'},{tag:'observation',t:'Estimer les quantités — faire les conserves'},{tag:'balcon',t:'🍒 Récolter toutes les tomates cerises restantes'}], tip:'🫙 C\'est le moment de faire les conserves : sauce tomate, ratatouille, poivrons marinés !' }
+    ],
+    8: [ // Septembre
+      { morn:[{tag:'arrosage',t:'Réduire les arrosages — les pluies de Pau reprennent'},{tag:'recolte',t:'Dernières tomates : récolter même légèrement vertes'},{tag:'sol',t:'Arracher plants courgettes et concombres épuisés'},{tag:'balcon',t:'Repiquer salades d\'automne dans les jardinières'}], eve:[{tag:'recolte',t:'Récolter dernières aubergines et poivrons'},{tag:'traitement',t:'Dernier traitement mildiou sur tomates restantes'},{tag:'observation',t:'Surveiller météo : premier gel pas avant novembre à Pau'},{tag:'sol',t:'Nettoyer espaces libérés, biner'}], tip:'🍅 Tomates vertes récoltées avant le gel mûrissent très bien dans une pièce tempérée.' },
+      { morn:[{tag:'arrosage',t:'Arroser selon météo — pluies peuvent suffire'},{tag:'recolte',t:'Récolter courges quand la tige est sèche'},{tag:'sol',t:'Incorporer compost dans les espaces libérés'},{tag:'balcon',t:'🍓 Charlotte remontante : belle 2e vague de production !'}], eve:[{tag:'recolte',t:'🫚 Récolter betteraves restantes, stocker en cave dans le sable'},{tag:'sol',t:'Semer engrais vert sur espaces vides'},{tag:'observation',t:'Vérifier les courges stockées'},{tag:'balcon',t:'Fertiliser jardinières une dernière fois'}], tip:'🎃 Les courges se conservent dans un endroit sec, aéré, à 10–15°C.' },
+      { morn:[{tag:'arrosage',t:'Arroser salades et oseille — le reste ralentit'},{tag:'recolte',t:'🥗 Belles récoltes de salades d\'automne !'},{tag:'sol',t:'Continuer incorporation de compost'},{tag:'taille',t:'Tailler plants tomates pour les derniers fruits'}], eve:[{tag:'recolte',t:'Récolter derniers poivrons'},{tag:'sol',t:'Planter l\'ail (fin septembre idéal)'},{tag:'observation',t:'Commencer le bilan de saison'},{tag:'balcon',t:'Préparer une jardinière pour l\'ail d\'hiver'}], tip:'🧄 Planter l\'ail fin septembre à Pau : prêt en juin–juillet.' },
+      { morn:[{tag:'arrosage',t:'Arroser uniquement si pas de pluie'},{tag:'recolte',t:'Récolter dernières tomates, même vertes'},{tag:'sol',t:'Arracher plants épuisés : tomates, aubergines, poivrons'},{tag:'balcon',t:'🥗 Récolte quotidienne salades — pleine production automnale'}], eve:[{tag:'sol',t:'Pailler les espaces nus'},{tag:'observation',t:'Vérifier oseille : produit jusqu\'aux gelées'},{tag:'recolte',t:'Dernière récolte oseille avant grands froids'},{tag:'sol',t:'Nettoyage et rangement matériel'}], tip:'🍂 L\'oseille est vivace — laisser quelques feuilles, elle reviendra seule au printemps.' }
+    ],
+    9: [ // Octobre
+      { morn:[{tag:'arrosage',t:'Arroser uniquement si sécheresse prolongée'},{tag:'recolte',t:'Récolter dernières courges avant le gel'},{tag:'sol',t:'Arracher tous les plants épuisés'},{tag:'balcon',t:'Rentrer l\'oseille si gel annoncé (<0°C)'}], eve:[{tag:'sol',t:'Binage et nettoyage général'},{tag:'recolte',t:'🥗 Dernières salades balcon'},{tag:'observation',t:'Vérifier stock de courges'},{tag:'sol',t:'Incorporer compost mature'}], tip:'🎃 Les courges peuvent se conserver 3 à 6 mois selon la variété.' },
+      { morn:[{tag:'arrosage',t:'Arroser salades et oseille si temps sec'},{tag:'recolte',t:'Récolter toutes les betteraves restantes'},{tag:'sol',t:'Planter ail et échalotes si pas encore fait'},{tag:'balcon',t:'Surveiller températures nocturnes'}], eve:[{tag:'sol',t:'Couvrir planches vides avec carton + paille'},{tag:'recolte',t:'Dernières récoltes d\'oseille'},{tag:'observation',t:'Inventaire du jardin'},{tag:'balcon',t:'Nettoyer jardinières vides'}], tip:'📓 Prendre des notes : variétés, emplacements, quantités. Précieux pour 2027 !' },
+      { morn:[{tag:'sol',t:'Travail du sol en profondeur sur les planches vides'},{tag:'sol',t:'Épandre compost ou fumier mûr'},{tag:'balcon',t:'Nettoyer et ranger les jardinières'},{tag:'arrosage',t:'Arroser l\'ail si temps très sec'}], eve:[{tag:'sol',t:'Couvrir le sol travaillé avec paillis épais (10 cm)'},{tag:'observation',t:'Vérifier l\'ail planté : premières pointes vertes ?'},{tag:'recolte',t:'Ramasser dernières feuilles d\'oseille'},{tag:'sol',t:'Faire un tas de feuilles mortes pour le compost'}], tip:'🍃 Ne pas laisser le sol nu cet hiver. Sol couvert = vie microbienne protégée.' },
+      { morn:[{tag:'sol',t:'Dernier désherbage de la saison'},{tag:'sol',t:'Vérifier et retourner le tas de compost'},{tag:'balcon',t:'Mettre oseille en repos : couper à ras, pailler'},{tag:'observation',t:'Tour final du jardin'}], eve:[{tag:'sol',t:'Ranger tuteurs, ficelles, étiquettes'},{tag:'sol',t:'Nettoyer et huiler les outils pour l\'hiver'},{tag:'observation',t:'Liste des graines et plants à commander pour 2027'},{tag:'balcon',t:'Dernier arrosage oseille avant dormance'}], tip:'🛠️ Des outils propres et huilés durent bien plus longtemps.' }
+    ],
+    10: [ // Novembre
+      { morn:[{tag:'sol',t:'Couvrir toutes les planches avec paillis épais ou engrais vert'},{tag:'observation',t:'Surveiller météo : gel possible à Pau en novembre'},{tag:'balcon',t:'Oseille en dormance — pas d\'arrosage'},{tag:'sol',t:'Vérifier état du compost'}], eve:[{tag:'sol',t:'Nettoyer derniers débris végétaux'},{tag:'observation',t:'Contrôler courges stockées'},{tag:'sol',t:'Préparer liste d\'améliorations 2027'},{tag:'balcon',t:'Nettoyer et stocker jardinières à l\'abri'}], tip:'❄️ En novembre à Pau, les gelées restent modérées. L\'oseille protégée peut rester dehors.' },
+      { morn:[{tag:'observation',t:'Vérifier régulièrement stocks courges et betteraves'},{tag:'sol',t:'Compléter le paillis si nécessaire'},{tag:'balcon',t:'Repos végétatif — pas d\'action'},{tag:'sol',t:'Commander les graines pour 2027'}], eve:[{tag:'sol',t:'Retourner le tas de compost une dernière fois'},{tag:'observation',t:'Faire le bilan écrit de la saison'},{tag:'sol',t:'Planifier la rotation des cultures pour 2027'},{tag:'balcon',t:'Planifier nouveaux aménagements balcon'}], tip:'🌱 La rotation des cultures est essentielle en bio : changer tomates/poivrons/aubergines de place chaque année.' },
+      { morn:[{tag:'observation',t:'Surveiller les stocks'},{tag:'sol',t:'L\'ail lève bien : pas d\'action'},{tag:'balcon',t:'Oseille en dormance — normal'},{tag:'sol',t:'Protéger l\'ail si gel intense prévu'}], eve:[{tag:'sol',t:'Continuer à ajouter déchets verts au compost'},{tag:'observation',t:'Consulter catalogues de graines 2027'},{tag:'sol',t:'Planifier nouvelles associations de plantes'},{tag:'balcon',t:'Commander jardinières plus grandes si besoin'}], tip:'📚 L\'hiver est la saison du jardinier qui lit et planifie. C\'est maintenant que se gagne 2027 !' },
+      { morn:[{tag:'observation',t:'Tour du jardin : tout est bien couvert ?'},{tag:'sol',t:'Si gel annoncé : couvrir l\'ail avec un voile'},{tag:'balcon',t:'Oseille en dormance — elle reprendra en mars'},{tag:'sol',t:'Dernière vérification du compost'}], eve:[{tag:'sol',t:'Ranger proprement tous les outils pour l\'hiver'},{tag:'observation',t:'Bilan final de saison'},{tag:'sol',t:'Préparer le plan du jardin 2027'},{tag:'balcon',t:'Planifier l\'agrandissement balcon si l\'expérience a été concluante !'}], tip:'🎉 Bravo pour cette première saison ! Un jardin bio s\'améliore chaque année. La prochaine sera encore meilleure !' }
+    ]
+  };
+
+  var monthTasks = T[m];
+  if (!monthTasks) return null;
+  return monthTasks[Math.min(week, monthTasks.length-1)];
+}
+
+function getTasksForDate(date) {
+  var key = date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+  if (TASKS[key]) return TASKS[key];
+  return getGenericTasks(date);
+}
+
+// DONNÉES PLANTES
+var PLANTS_DATA = {
+  'tomate':{e:'🍅',n:'Tomate',f:'Solanacée',esp:'60–80 cm',sol:'Plein soleil',eau:'Régulier au pied',rec:'Juillet–Octobre',good:'✅ Basilic, carottes, persil\n✅ Soucis en bordure',bad:'❌ Fenouil\n❌ Pomme de terre'},
+  'tomate-cerise':{e:'🍒',n:'Tomate cerise noire',f:'Solanacée · Balcon',esp:'1 plant/jardinière 60cm',sol:'Est–Sud-Est · Balcon',eau:'Quotidien, éviter à-coups',rec:'Juin–Octobre',good:'✅ Basilic, soucis\n✅ Compagnes de pot',bad:'❌ Fenouil'},
+  'poivron':{e:'🫑',n:'Poivron',f:'Solanacée',esp:'40–50 cm',sol:'Plein soleil chaud',eau:'Régulier',rec:'Juillet–Septembre',good:'✅ Basilic, carottes\n✅ Soucis en bordure',bad:'❌ Fenouil\n❌ Éviter côte à côte avec aubergines'},
+  'aubergine':{e:'🍆',n:'Aubergine',f:'Solanacée',esp:'50–60 cm',sol:'Plein soleil, très chaud',eau:'Copieux',rec:'Juillet–Septembre',good:'✅ Basilic, estragon\n✅ Haricots verts',bad:'❌ Fenouil\n❌ Éviter côte à côte avec poivrons'},
+  'concombre':{e:'🥒',n:'Concombre',f:'Cucurbitacée',esp:'50 cm (sur treillis)',sol:'Soleil',eau:'Abondant, régulier',rec:'Juillet–Septembre',good:'✅ Haricots, capucines\n✅ Aneth, bourrache',bad:'❌ Pomme de terre, fenouil'},
+  'courgette':{e:'🥒',n:'Courgette',f:'Cucurbitacée',esp:'1–1,5 m',sol:'Plein soleil',eau:'Abondant',rec:'Juin–Octobre',good:'✅ Capucines, bourrache\n✅ Soucis',bad:'❌ Pomme de terre'},
+  'courge':{e:'🎃',n:'Courge',f:'Cucurbitacée',esp:'1,5–2 m',sol:'Plein soleil',eau:'Copieux',rec:'Août–Octobre',good:'✅ Maïs, haricots\n✅ Capucines, bourrache',bad:'❌ Pomme de terre'},
+  'melon':{e:'🍈',n:'Melon',f:'Cucurbitacée',esp:'80 cm–1 m',sol:'Plein soleil, chaud',eau:'Régulier, réduire à maturité',rec:'Juillet–Août',good:'✅ Bourrache, soucis\n✅ Maïs (brise-vent)',bad:'❌ Pomme de terre'},
+  'betterave':{e:'🫚',n:'Betterave',f:'Légume-racine',esp:'15–20 cm',sol:'Mi-ombre acceptable',eau:'Régulier, éviter à-coups',rec:'Juillet–Octobre',good:'✅ Ciboulette, oignons\n✅ Salades, radis',bad:'❌ Haricots\n❌ Maïs'},
+  'haricot':{e:'🌱',n:'Haricot grimpant',f:'Légumineuse',esp:'1 pied/tuteur',sol:'Soleil à mi-ombre',eau:'Régulier',rec:'Juillet–Septembre',good:'✅ Carottes, concombres\n✅ Courgettes',bad:'❌ Betteraves\n❌ Oignons, ciboulette'},
+  'salade':{e:'🥗',n:'Salade',f:'Légume-feuille · Balcon',esp:'25–30 cm',sol:'Est · Mi-ombre été',eau:'Régulier le soir',rec:'Mai–Juin, Sept–Oct',good:'✅ Radis, carottes\n✅ Tomates (ombre bénéfique)',bad:'❌ Fenouil, céleri'},
+  'fraise-g':{e:'🍓',n:'Fraise Gariguette',f:'Rosacée · Balcon',esp:'25 cm',sol:'Est–Sud-Est · Balcon',eau:'Régulier sans mouiller feuilles',rec:'Mai–Juin (non remontante)',good:'✅ Bourrache, ail\n✅ Soucis en pot',bad:'❌ Brassicas'},
+  'fraise-c':{e:'🍓',n:'Fraise Charlotte',f:'Rosacée remontante · Balcon',esp:'25 cm',sol:'Est–Sud-Est · Balcon',eau:'Régulier',rec:'Juin–Octobre (remontante)',good:'✅ Bourrache, ail\n✅ Soucis en pot',bad:'❌ Brassicas'},
+  'oseille':{e:'🌿',n:'Oseille',f:'Vivace · Balcon',esp:'30 cm en touffe',sol:'Mi-ombre à soleil',eau:'Modéré',rec:'Mai–Octobre (en continu)',good:'✅ S\'adapte partout\n✅ Betteraves, carottes',bad:'Aucune mauvaise association'},
+  'basilic':{e:'🌿',n:'Basilic',f:'Aromatique annuelle',esp:'20–25 cm',sol:'Plein soleil, chaud',eau:'Régulier, pas le soir',rec:'Juin–Septembre',good:'✅ Tomates (association reine)\n✅ Poivrons, aubergines',bad:'❌ Sauge\n❌ Froid (<15°C)'},
+  'soucis':{e:'🌼',n:'Soucis / Calendula',f:'Plante compagne annuelle',esp:'25–30 cm',sol:'Plein soleil',eau:'Peu',rec:'Fleurs tout l\'été',good:'✅ Universel — bénéfique partout\n✅ Repousse nématodes, pucerons',bad:'Aucune mauvaise association'},
+  'capucine':{e:'🌸',n:'Capucine',f:'Plante compagne',esp:'30 cm',sol:'Soleil à mi-ombre',eau:'Peu',rec:'Fleurs tout l\'été',good:'✅ Courgettes, concombres\n✅ Tomates, radis',bad:'Aucune mauvaise association'},
+};
+
+// PARCELLES
+var PARCELLES = [
+  {
+    id:'A', title:'Planche A — 3m × 1m',
+    sub:'Soleil 10h–18h · Côté planche A',
+    badge:'Planche existante',
+    plants:[
+      {id:'betterave',label:'Betteraves',cls:'chip-sol',note:'Déjà plantées ✅ · 15–20 cm espacement'},
+      {id:'haricot',label:'Haricots grimpants',cls:'chip-aromatique',note:'En serre, tuteurs en place → à planter'},
+      {id:'soucis',label:'Soucis / Calendula',cls:'chip-compagne',note:'En bordure de rang'},
+    ]
+  },
+  {
+    id:'B', title:'Parcelle B — 6m × 2m',
+    sub:'Bon ensoleillement · Solanacées + concombres',
+    badge:'Parcelle principale',
+    plants:[
+      {id:'tomate',label:'Tomates × 4',cls:'chip-solanee',note:'Rang nord · 80 cm espacement · à planter ce soir'},
+      {id:'basilic',label:'Basilic × 3',cls:'chip-aromatique',note:'Intercalé entre les tomates'},
+      {id:'poivron',label:'Poivrons × 4',cls:'chip-solanee',note:'Rang centre ouest · 40–50 cm · après 15 mai'},
+      {id:'aubergine',label:'Aubergines × 3',cls:'chip-solanee',note:'Rang centre est · 50–60 cm · après 15 mai'},
+      {id:'concombre',label:'Concombres × 3',cls:'chip-cucurbit',note:'Sur treillis · 50 cm · à planter'},
+      {id:'capucine',label:'Capucines',cls:'chip-compagne',note:'Bordure sud · séparation avec parcelle C'},
+      {id:'soucis',label:'Soucis',cls:'chip-compagne',note:'Bordure et intercalés'},
+    ]
+  },
+  {
+    id:'C', title:'Parcelle C — 6m × 2m',
+    sub:'Plein sud · Ex-bâchée 1 an · Sol riche prêt',
+    badge:'🎉 Sol préparé !',
+    plants:[
+      {id:'courgette',label:'Courgettes × 3',cls:'chip-cucurbit',note:'Rang nord · 1,5 m espacement'},
+      {id:'melon',label:'Melons × 3',cls:'chip-cucurbit',note:'Rang centre · 1 m espacement'},
+      {id:'courge',label:'Courges × 2',cls:'chip-cucurbit',note:'Rang sud · 1,5–2 m · s\'étalent vers le sud'},
+    ]
+  },
+  {
+    id:'BAL', title:'Balcon — Est/Sud-Est',
+    sub:'Jardinières 60 cm · Exposition idéale',
+    badge:'🪴 Balcon',
+    plants:[
+      {id:'tomate-cerise',label:'Tomates cerises noires',cls:'chip-balcon',note:'1 plant/jardinière · tuteur 80 cm · à planter'},
+      {id:'salade',label:'Salades',cls:'chip-feuille',note:'Plantées ✅ · Récolte feuille par feuille'},
+      {id:'fraise-g',label:'Fraises Gariguette × 3',cls:'chip-balcon',note:'Plantées ✅ · Récolte mai–juin'},
+      {id:'fraise-c',label:'Fraises Charlotte × 3',cls:'chip-balcon',note:'Plantées ✅ · Récolte juin–octobre'},
+      {id:'oseille',label:'Oseille',cls:'chip-feuille',note:'Vivace · Récolte en continu'},
+    ]
+  }
+];
+
+// RECETTES BIO
+var RECETTES = [
+  {title:'🌿 Purin d\'ortie',color:'#2a4a18',txt:'<strong>Usage :</strong> Engrais azoté, stimulant, répulsif pucerons.<br><strong>Recette :</strong> 1 kg d\'orties fraîches + 10 L d\'eau non chlorée. Macérer 10–15 jours en remuant chaque jour. Filtrer.<br><strong>Dilution :</strong> 20% au pied (arrosage) · 10% sur feuilles (pulvérisation).'},
+  {title:'🧄 Décoction d\'ail',color:'#1a3a10',txt:'<strong>Usage :</strong> Fongicide, anti-mildiou, anti-oïdium.<br><strong>Recette :</strong> 100 g d\'ail écrasé + 1 L d\'eau. Porter à ébullition 5 min, filtrer. Diluer à 5% et pulvériser le soir.'},
+  {title:'🍺 Piège à limaces',color:'#2a2010',txt:'<strong>Recette :</strong> Enterrer un pot jusqu\'au bord, y verser de la bière blonde au 2/3. Couvrir d\'une tuile en laissant les bords ouverts. Vider chaque matin. Efficace dans un rayon de 50 cm.'},
+  {title:'🌼 Macérat de prêle',color:'#1a3a20',txt:'<strong>Usage :</strong> Renforce les défenses, anti-mildiou préventif.<br><strong>Recette :</strong> 150 g de prêle séchée + 1 L d\'eau. Faire bouillir 20 min, infuser 24h. Diluer à 20% et pulvériser 1×/semaine.'},
+  {title:'🫚 Savon noir + Neem',color:'#0a2a1a',txt:'<strong>Usage :</strong> Pucerons, aleurodes, araignées rouges.<br><strong>Recette :</strong> 5 mL savon noir + 5 mL huile de neem dans 1 L d\'eau tiède. Pulvériser le matin, éviter soleil direct.'},
+  {title:'🌾 Paillage',color:'#2a1a08',txt:'<strong>Épaisseur :</strong> 6–10 cm (tomates), 4–6 cm (betteraves), 3–4 cm (salades, fraises).<br><strong>Règle d\'or :</strong> Toujours laisser 5 cm d\'espace libre autour du collet. Pailler sur sol humide. Paille bien sèche uniquement.'},
+  {title:'🥚 Coquilles d\'œufs',color:'#1a1a0a',txt:'<strong>Usage :</strong> Anti-limaces naturel — les arêtes coupantes sont infranchissables.<br><strong>Utilisation :</strong> Broyer finement, disposer en couronne autour des plants. Renouveler tous les 15 jours.'},
+  {title:'☕ Marc de café',color:'#1a0a00',txt:'<strong>Usage :</strong> Anti-limaces + engrais léger en potasse.<br><strong>Utilisation :</strong> Cercle de marc autour des plants chaque matin. Récupérer le marc de ta cafetière quotidiennement.'},
+];
+
+// ════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════
+
+var currentPage = 'today';
+
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(el){ el.classList.remove('active'); });
+  if (p === 'day') {
+    document.getElementById('page-day').classList.add('active');
+  } else {
+    document.getElementById('page-'+p).classList.add('active');
+    document.getElementById('nav-'+p).classList.add('active');
+    currentPage = p;
+  }
+  // Scroll to top
+  var pg = document.getElementById('page-'+(p==='day'?'day':p));
+  if (pg) pg.scrollTop = 0;
+}
+
+function backToCal() { showPage('cal'); }
+
+// ════════════════════════════════════════
+// PAGE AUJOURD'HUI
+// ════════════════════════════════════════
+
+function renderToday() {
+  var now = TODAY_DATE;
+  var df = DAYS_FR[now.getDay()]+' '+now.getDate()+' '+MONTHS_FR[now.getMonth()]+' 2026';
+  document.getElementById('header-date').textContent = 'Pau · '+df;
+
+  var tasks = getTasksForDate(now);
+  var dateKey = dateKey2(now);
+  var html = '';
+
+  // Hero card
+  var total = tasks ? (tasks.morn.length + tasks.eve.length) : 0;
+  var done = 0;
+  if (tasks) {
+    tasks.morn.forEach(function(t,i){ if(isDone(dateKey+'-morn-'+i)) done++; });
+    tasks.eve.forEach(function(t,i){ if(isDone(dateKey+'-eve-'+i)) done++; });
+  }
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+
+  html += '<div class="today-hero">';
+  html += '<div class="today-date">'+DAYS_FR[now.getDay()]+' '+now.getDate()+' '+MONTHS_FR[now.getMonth()]+'</div>';
+  html += '<div class="today-title">Aujourd\'hui au jardin</div>';
+  html += '<div class="today-sub">'+total+' tâches · '+done+' accomplies</div>';
+  html += '<div class="progress-bar"><div class="progress-fill" id="today-bar" style="width:'+pct+'%"></div></div>';
+  html += '<div class="progress-label" id="today-prog">'+pct+'% accompli</div>';
+  html += '</div>';
+
+  if (tasks) {
+    html += renderTimeBlock(tasks.morn, dateKey, 'morn', 'matin', '🌅', 'morn');
+    html += renderTimeBlock(tasks.eve, dateKey, 'eve', 'soir', '🌙', 'eve');
+    if (tasks.tip) html += '<div class="tip-box"><strong>💡 Conseil :</strong> '+tasks.tip+'</div>';
+  }
+
+  document.getElementById('today-content').innerHTML = html;
+  restoreTaskStates(dateKey);
+}
+
+function renderTimeBlock(taskArr, dateKey, period, label, icon, cls) {
+  var html = '<div class="time-section">';
+  html += '<div class="time-header time-header-'+cls+'">';
+  html += '<span style="font-size:18px">'+icon+'</span>';
+  html += '<span class="time-label time-label-'+cls+'">'+label.toUpperCase()+' — '+( cls==='morn' ? 'avant 10h' : 'après 18h' )+'</span>';
+  html += '</div>';
+  html += '<div class="task-list task-list-'+cls+'">';
+  taskArr.forEach(function(task, i) {
+    var tid = dateKey+'-'+period+'-'+i;
+    var done = isDone(tid);
+    html += '<div class="task-item'+(done?' done':')+'" id="ti-'+tid+'" onclick="toggleTaskItem(\''+tid+'\',\'today\')">';
+    html += '<div class="task-check"><svg viewBox="0 0 12 10" fill="none" stroke="white" stroke-width="2"><polyline points="1,5 5,9 11,1"/></svg></div>';
+    html += '<span class="task-tag tag-'+task.tag+'">'+task.tag+'</span>';
+    html += '<span class="task-text">'+task.t+'</span>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function toggleTaskItem(tid, context) {
+  toggle(tid);
+  var el = document.getElementById('ti-'+tid);
+  if (el) el.classList.toggle('done', isDone(tid));
+  updateTodayProgress();
+  // Mettre à jour aussi dans le calendrier si visible
+  var el2 = document.getElementById('ti2-'+tid);
+  if (el2) el2.classList.toggle('done', isDone(tid));
+}
+
+function updateTodayProgress() {
+  var dateKey = dateKey2(TODAY_DATE);
+  var tasks = getTasksForDate(TODAY_DATE);
+  if (!tasks) return;
+  var total = tasks.morn.length + tasks.eve.length;
+  var done = 0;
+  tasks.morn.forEach(function(t,i){ if(isDone(dateKey+'-morn-'+i)) done++; });
+  tasks.eve.forEach(function(t,i){ if(isDone(dateKey+'-eve-'+i)) done++; });
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  var bar = document.getElementById('today-bar');
+  var prog = document.getElementById('today-prog');
+  if (bar) bar.style.width = pct+'%';
+  if (prog) prog.textContent = pct+'% accompli — '+done+'/'+total+' tâches';
+}
+
+function restoreTaskStates(dateKey) {
+  var d = load();
+  Object.keys(d).forEach(function(tid){
+    var el = document.getElementById('ti-'+tid);
+    if (el) el.classList.add('done');
+    var el2 = document.getElementById('ti2-'+tid);
+    if (el2) el2.classList.add('done');
+  });
+}
+
+// ════════════════════════════════════════
+// PAGE CALENDRIER
+// ════════════════════════════════════════
+
+var calMonth = 4; // Mai = 4 (0-indexed)
+var calYear = 2026;
+
+function renderCal() {
+  var html = '';
+  var monthsToShow = [
+    {m:4,y:2026,days:31},{m:5,y:2026,days:30},{m:6,y:2026,days:31},
+    {m:7,y:2026,days:31},{m:8,y:2026,days:30},{m:9,y:2026,days:31},
+    {m:10,y:2026,days:30}
+  ];
+
+  monthsToShow.forEach(function(mo) {
+    html += '<div class="month-title">'+MONTHS_FR[mo.m]+' '+mo.y+'</div>';
+    var startDay = mo.m === 4 ? 10 : 1; // Mai commence au 10
+    for (var d = startDay; d <= mo.days; d++) {
+      var date = new Date(mo.y, mo.m, d);
+      var key = dateKey3(mo.y, mo.m+1, d);
+      var tasks = getTasksForDate(date);
+      var total = tasks ? tasks.morn.length + tasks.eve.length : 0;
+      var done = 0;
+      if (tasks) {
+        var dk = dateKey3(mo.y, mo.m+1, d);
+        tasks.morn.forEach(function(t,i){ if(isDone(dk+'-morn-'+i)) done++; });
+        tasks.eve.forEach(function(t,i){ if(isDone(dk+'-eve-'+i)) done++; });
+      }
+      var isToday = date.getTime() === TODAY_DATE.getTime();
+      var isPast = date < TODAY_DATE;
+      var cls = 'day-row'+(isToday?' today-row':'')+(isPast?' past-row':'');
+      var tags = tasks ? [...new Set([...tasks.morn,...tasks.eve].map(function(t){return t.tag;}))] : [];
+      var icons = {arrosage:'💧',traitement:'🌿',taille:'✂️',recolte:'🧺',sol:'🪱',observation:'👁️',balcon:'🪴',urgent:'⚠️'};
+      var tagStr = tags.slice(0,4).map(function(t){ return icons[t]||''; }).join(' ');
+      var progStr = total > 0 ? '<span class="day-prog'+(done===total?' done-all':'')+'">'+done+'/'+total+'</span>' : '';
+      var todayBadge = isToday ? '<span class="today-badge">Aujourd\'hui</span>' : '';
+      html += '<div class="'+cls+'" onclick="showDayDetail('+mo.y+','+mo.m+','+d+')">';
+      html += '<div class="day-num">'+d+'</div>';
+      html += '<div class="day-info"><div class="day-name">'+DAYS_FR[date.getDay()]+' '+d+' '+MONTHS_FR[mo.m]+todayBadge+'</div>';
+      html += '<div class="day-tags">'+tagStr+'</div></div>';
+      html += progStr;
+      html += '<div class="day-chevron">›</div>';
+      html += '</div>';
+    }
+  });
+
+  document.getElementById('cal-content').innerHTML = html;
+}
+
+function showDayDetail(y, m, d) {
+  var date = new Date(y, m, d);
+  var tasks = getTasksForDate(date);
+  var dk = dateKey3(y, m+1, d);
+  var html = '';
+
+  html += '<div style="padding:14px 14px 4px;background:#0e1a08;border-bottom:1px solid #1e2a0e">';
+  html += '<div style="font-size:18px;font-weight:700;color:#c8e090">'+DAYS_FR[date.getDay()]+' '+d+' '+MONTHS_FR[m]+' '+y+'</div>';
+  html += '<div style="font-size:12px;color:#6a8a4a;margin-top:2px">Tâches du jour</div></div>';
+
+  if (tasks) {
+    html += renderTimeBlockDetail(tasks.morn, dk, 'morn', 'Matin', '🌅', 'morn');
+    html += renderTimeBlockDetail(tasks.eve, dk, 'eve', 'Soir', '🌙', 'eve');
+    if (tasks.tip) html += '<div class="tip-box" style="margin:12px"><strong>💡 Conseil :</strong> '+tasks.tip+'</div>';
+  } else {
+    html += '<div style="padding:30px;text-align:center;color:#5a7a3a;font-size:14px">Pas de tâches spécifiques ce jour.<br>Maintenir les routines habituelles.</div>';
+  }
+
+  document.getElementById('day-detail-content').innerHTML = html;
+  restoreTaskStates(dk);
+  showPage('day');
+}
+
+function renderTimeBlockDetail(taskArr, dateKey, period, label, icon, cls) {
+  var html = '<div class="time-section">';
+  html += '<div class="time-header time-header-'+cls+'">';
+  html += '<span style="font-size:18px">'+icon+'</span>';
+  html += '<span class="time-label time-label-'+cls+'">'+label.toUpperCase()+' — '+(cls==='morn'?'avant 10h':'après 18h')+'</span>';
+  html += '</div>';
+  html += '<div class="task-list task-list-'+cls+'">';
+  taskArr.forEach(function(task, i) {
+    var tid = dateKey+'-'+period+'-'+i;
+    var done = isDone(tid);
+    html += '<div class="task-item'+(done?' done':'')+'\" id="ti2-'+tid+'" onclick="toggleTaskItem(\''+tid+'\',\'cal\')">';
+    html += '<div class="task-check"><svg viewBox="0 0 12 10" fill="none" stroke="white" stroke-width="2"><polyline points="1,5 5,9 11,1"/></svg></div>';
+    html += '<span class="task-tag tag-'+task.tag+'">'+task.tag+'</span>';
+    html += '<span class="task-text">'+task.t+'</span>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+// ════════════════════════════════════════
+// PAGE PARCELLES
+// ════════════════════════════════════════
+
+function renderParcelles() {
+  var html = '';
+  PARCELLES.forEach(function(p) {
+    html += '<div class="parcel-card">';
+    html += '<div class="parcel-header">';
+    html += '<div><div class="parcel-title">'+p.title+'</div><div class="parcel-sub">'+p.sub+'</div></div>';
+    html += '<span class="parcel-badge">'+p.badge+'</span>';
+    html += '</div>';
+    html += '<div class="plant-grid">';
+    p.plants.forEach(function(pl) {
+      html += '<div class="plant-chip2 '+pl.cls+'" onclick="showPlant(\''+pl.id+'\',\''+pl.note+'\')">'+PLANTS_DATA[pl.id].e+' '+pl.label+'</div>';
+    });
+    html += '</div></div>';
+  });
+  document.getElementById('parcelles-content').innerHTML = html;
+}
+
+function showPlant(id, note) {
+  var p = PLANTS_DATA[id];
+  if (!p) return;
+  document.getElementById('s-emoji').textContent = p.e;
+  document.getElementById('s-name').textContent = p.n;
+  document.getElementById('s-family').textContent = p.f;
+  document.getElementById('s-info').innerHTML =
+    '<div class="info-pill"><strong>Espacement</strong><span>'+p.esp+'</span></div>'+
+    '<div class="info-pill"><strong>Soleil</strong><span>'+p.sol+'</span></div>'+
+    '<div class="info-pill"><strong>Arrosage</strong><span>'+p.eau+'</span></div>'+
+    '<div class="info-pill"><strong>Récolte</strong><span>'+p.rec+'</span></div>'+
+    (note ? '<div class="info-pill" style="min-width:100%;background:#1a2a0e"><strong>Note</strong><span>'+note+'</span></div>' : '');
+  document.getElementById('s-assoc').innerHTML =
+    '<div class="assoc-title">Bonnes associations</div>'+
+    '<div class="assoc-good">'+p.good.replace(/\n/g,'<br>')+'</div>'+
+    (p.bad ? '<div class="assoc-title" style="margin-top:10px;color:#c05030">À éviter</div><div class="assoc-bad">'+p.bad.replace(/\n/g,'<br>')+'</div>' : '');
+  document.getElementById('plant-sheet').classList.add('open');
+  document.getElementById('sheet-overlay').classList.add('open');
+}
+
+function closeSheet() {
+  document.getElementById('plant-sheet').classList.remove('open');
+  document.getElementById('sheet-overlay').classList.remove('open');
+}
+
+// ════════════════════════════════════════
+// PAGE RECETTES / INFO
+// ════════════════════════════════════════
+
+function renderInfo() {
+  var html = '';
+  RECETTES.forEach(function(r) {
+    html += '<div class="info-card" style="border-left:4px solid '+(r.color||'#3a5c28')+'">';
+    html += '<h3>'+r.title+'</h3><p>'+r.txt+'</p></div>';
+  });
+  html += '<div style="margin:10px 12px;padding:12px;background:#0e1a08;border-radius:10px;border:1px solid #2a4a18">';
+  html += '<div style="font-size:12px;font-weight:700;color:#a8cc80;margin-bottom:8px">🌿 Mon jardin</div>';
+  html += '<div style="font-size:12px;color:#6a8a4a;line-height:1.7">📍 Pau · Pyrénées-Atlantiques<br>🪴 Balcon Est/Sud-Est · Jardinières 60 cm<br>🌱 3 parcelles + balcon<br>🍃 100% Bio · Saison mai–novembre 2026</div></div>';
+  html += '<button class="reset-btn" onclick="resetTasks()">🗑️ Réinitialiser les tâches cochées</button>';
+  document.getElementById('info-content').innerHTML = html;
+}
+
+function resetTasks() {
+  if (confirm('Effacer toutes les tâches cochées ?')) {
+    localStorage.removeItem(SK);
+    renderToday();
+    alert('✅ Tâches réinitialisées');
+  }
+}
+
+// ════════════════════════════════════════
+// UTILITAIRES
+// ════════════════════════════════════════
+
+function dateKey2(date) {
+  return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+}
+function dateKey3(y, m, d) {
+  return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+
+renderToday();
+renderCal();
+renderParcelles();
+renderInfo();
+</script>
+</body>
+</html>
