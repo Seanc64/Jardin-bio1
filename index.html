@@ -829,7 +829,8 @@ function renderTimeBlock(taskArr, dateKey, period, label, icon, cls) {
   taskArr.forEach(function(task, i) {
     var tid = dateKey+'-'+period+'-'+i;
     var done = isDone(tid);
-    html += '<div class="task-item'+(done?' done':')+'" id="ti-'+tid+'" onclick="toggleTaskItem(\''+tid+'\',\'today\')">';
+    var doneClass = done ? ' done' : '';
+    html += '<div class="task-item'+doneClass+'" id="ti-'+tid+'" onclick="toggleTaskItem(\''+tid+'\',\'today\')">';
     html += '<div class="task-check"><svg viewBox="0 0 12 10" fill="none" stroke="white" stroke-width="2"><polyline points="1,5 5,9 11,1"/></svg></div>';
     html += '<span class="task-tag tag-'+task.tag+'">'+task.tag+'</span>';
     html += '<span class="task-text">'+task.t+'</span>';
@@ -957,7 +958,8 @@ function renderTimeBlockDetail(taskArr, dateKey, period, label, icon, cls) {
   taskArr.forEach(function(task, i) {
     var tid = dateKey+'-'+period+'-'+i;
     var done = isDone(tid);
-    html += '<div class="task-item'+(done?' done':'')+'\" id="ti2-'+tid+'" onclick="toggleTaskItem(\''+tid+'\',\'cal\')">';
+    var doneClass2 = done ? ' done' : '';
+    html += '<div class="task-item'+doneClass2+'" id="ti2-'+tid+'" onclick="toggleTaskItem(\''+tid+'\',\'cal\')">';
     html += '<div class="task-check"><svg viewBox="0 0 12 10" fill="none" stroke="white" stroke-width="2"><polyline points="1,5 5,9 11,1"/></svg></div>';
     html += '<span class="task-tag tag-'+task.tag+'">'+task.tag+'</span>';
     html += '<span class="task-text">'+task.t+'</span>';
